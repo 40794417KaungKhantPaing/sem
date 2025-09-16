@@ -1,6 +1,7 @@
 [![A workflow for my Hello World App](https://github.com/40794417KaungKhantPaing/sem/actions/workflows/main.yml/badge.svg?branch=master)](https://github.com/40794417KaungKhantPaing/sem/actions/workflows/main.yml)
 [![LICENSE](https://img.shields.io/github/license/40794417KaungKhantPaing/sem.svg?style=flat-square)](https://github.com/40794417KaungKhantPaing/sem/blob/master/LICENSE)
-![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/40794417KaungKhantPaing/sem/Hello%20World%20App/master?style=flat-square)
+![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/40794417KaungKhantPaing/sem/main.yml?branch=develop&style=flat-square)
+
 
 
 
