@@ -1,22 +1,12 @@
 version: '3'
 services:
+  # Application Dockerfile is in same folder which is .
   app:
     build: .
-    depends_on:
-      - db
-    environment:
-      - DB_HOST=db
-      - DB_USER=myuser
-      - DB_PASSWORD=mypassword
-      - DB_NAME=test_db
 
+  # db is is db folder
   db:
-    image: mysql:8.0   # you don't need to build your own unless you have a custom Dockerfile
+    build: db/.
     restart: always
-    environment:
-      MYSQL_ROOT_PASSWORD: example
-      MYSQL_DATABASE: test_db
-      MYSQL_USER: myuser
-      MYSQL_PASSWORD: mypassword
     ports:
-      - "3306:3306"
+      - "3306"
