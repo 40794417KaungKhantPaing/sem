@@ -1,20 +1,15 @@
 package com.napier.sem;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
 
 public class App
 {
-    /**
-     * Connection to MySQL database.
-     */
+
+    /* Connection to MySQL database.
+        */
     private Connection con = null;
 
-    /**
-     * Connect to the MySQL database.
+    /* Connect to the MySQL database.
      */
     public void connect()
     {
@@ -36,19 +31,16 @@ public class App
             try
             {
                 // Wait a bit for db to start
-                Thread.sleep(3000);
+                Thread.sleep(30000);
                 // Connect to database
-                con = DriverManager.getConnection(
-                        "jdbc:mysql://localhost:3306/employees?useSSL=false",
-                        "root",
-                        "example"
-                );
+                con = DriverManager.getConnection("jdbc:mysql://db:3306/employees?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC",
+                        "root", "example");
                 System.out.println("Successfully connected");
                 break;
             }
             catch (SQLException sqle)
             {
-                System.out.println("Failed to connect to database attempt " + i);
+                System.out.println("Failed to connect to database attempt " + Integer.toString(i));
                 System.out.println(sqle.getMessage());
             }
             catch (InterruptedException ie)
@@ -67,8 +59,8 @@ public class App
         {
             try
             {
+                // Close connection
                 con.close();
-                System.out.println("Disconnected from database");
             }
             catch (Exception e)
             {
@@ -77,28 +69,22 @@ public class App
         }
     }
 
-    /**
-     * Get employee information from database.
-     * @param ID Employee ID to lookup
-     * @return Employee object or null if not found
-     */
+
     public Employee getEmployee(int ID)
     {
         try
         {
             // Create an SQL statement
             Statement stmt = con.createStatement();
-
             // Create string for SQL statement
             String strSelect =
                     "SELECT emp_no, first_name, last_name "
                             + "FROM employees "
                             + "WHERE emp_no = " + ID;
-
             // Execute SQL statement
             ResultSet rset = stmt.executeQuery(strSelect);
-
-            // Check if employee exists
+            // Return new employee if valid.
+            // Check one is returned
             if (rset.next())
             {
                 Employee emp = new Employee();
@@ -108,10 +94,9 @@ public class App
                 return emp;
             }
             else
-            {
-                System.out.println("Employee not found");
-                return null;
-            }
+            {System.out.println("no success");
+                return null;}
+
         }
         catch (Exception e)
         {
@@ -120,6 +105,7 @@ public class App
             return null;
         }
     }
+
     public void displayEmployee(Employee emp)
     {
         if (emp != null)
@@ -133,6 +119,8 @@ public class App
                             + emp.dept_name + "\n"
                             + "Manager: " + emp.manager + "\n");
         }
+        else
+            System.out.println("Employee is null");
     }
 
     public static void main(String[] args)
@@ -143,11 +131,13 @@ public class App
         // Connect to database
         a.connect();
         // Get Employee
-        Employee emp = a.getEmployee(255530);
+        Employee emp = a.getEmployee(490758);
         // Display results
         a.displayEmployee(emp);
 
         // Disconnect from database
         a.disconnect();
     }
+
+
 }
