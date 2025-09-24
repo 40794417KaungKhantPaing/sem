@@ -16,5 +16,4 @@ jobs:
       - name: Build with Maven
         run: mvn package
       - name: Run docker compose
-        run: docker compose up --abort-on-container-exit -v ./test_db:/docker-entrypoint-initdb.d
-
+        run: docker compose up --abort-on-container-exit
