@@ -118,6 +118,47 @@ public class App
             return null;
         }
     }
+    public void getSalariesByRole(String role)
+    {
+        try
+        {
+            String strSelect =
+                    "SELECT e.emp_no, e.first_name, e.last_name, s.salary " +
+                            "FROM employees e, salaries s, titles t " +
+                            "WHERE e.emp_no = s.emp_no " +
+                            "  AND e.emp_no = t.emp_no " +
+                            "  AND s.to_date = '9999-01-01' " +
+                            "  AND t.to_date = '9999-01-01' " +
+                            "  AND t.title = ? " +
+                            "ORDER BY e.emp_no ASC";
+
+            PreparedStatement pstmt = con.prepareStatement(strSelect);
+            pstmt.setString(1, role);
+
+            ResultSet rset = pstmt.executeQuery();
+
+            System.out.printf("%-10s %-15s %-15s %-10s\n",
+                    "Emp_No", "First_Name", "Last_Name", "Salary");
+            System.out.println("-----------------------------------------------------");
+
+            while (rset.next())
+            {
+                int emp_no = rset.getInt("emp_no");
+                String first = rset.getString("first_name");
+                String last = rset.getString("last_name");
+                int salary = rset.getInt("salary");
+
+                System.out.printf("%-10d %-15s %-15s %-10d\n",
+                        emp_no, first, last, salary);
+            }
+        }
+        catch (Exception e)
+        {
+            System.out.println(e.getMessage());
+            System.out.println("Failed to get salaries by role");
+        }
+    }
+
 
 
     public void displayEmployee(Employee emp)
@@ -148,6 +189,9 @@ public class App
         Employee emp = a.getEmployee(490758);
         // Display results
         a.displayEmployee(emp);
+        // New feature: get salaries by role
+        System.out.println("\n--- Salaries for Engineers ---");
+        a.getSalariesByRole("Engineer");
 
         // Disconnect from database
         a.disconnect();
