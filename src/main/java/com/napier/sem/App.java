@@ -74,29 +74,42 @@ public class App
     {
         try
         {
-            // Create an SQL statement
-            Statement stmt = con.createStatement();
-            // Create string for SQL statement
+            // Use PreparedStatement to avoid SQL injection
             String strSelect =
-                    "SELECT emp_no, first_name, last_name "
-                            + "FROM employees "
-                            + "WHERE emp_no = " + ID;
-            // Execute SQL statement
-            ResultSet rset = stmt.executeQuery(strSelect);
-            // Return new employee if valid.
-            // Check one is returned
+                    "SELECT e.emp_no, e.first_name, e.last_name, " +
+                            "       t.title, s.salary, d.dept_name, " +
+                            "       CONCAT(m.first_name, ' ', m.last_name) AS manager " +
+                            "FROM employees e " +
+                            "     JOIN titles t ON e.emp_no = t.emp_no AND t.to_date = '9999-01-01' " +
+                            "     JOIN salaries s ON e.emp_no = s.emp_no AND s.to_date = '9999-01-01' " +
+                            "     JOIN dept_emp de ON e.emp_no = de.emp_no AND de.to_date = '9999-01-01' " +
+                            "     JOIN departments d ON de.dept_no = d.dept_no " +
+                            "     JOIN dept_manager dm ON d.dept_no = dm.dept_no AND dm.to_date = '9999-01-01' " +
+                            "     JOIN employees m ON dm.emp_no = m.emp_no " +
+                            "WHERE e.emp_no = ?";
+
+            PreparedStatement pstmt = con.prepareStatement(strSelect);
+            pstmt.setInt(1, ID);
+
+            ResultSet rset = pstmt.executeQuery();
+
             if (rset.next())
             {
                 Employee emp = new Employee();
                 emp.emp_no = rset.getInt("emp_no");
                 emp.first_name = rset.getString("first_name");
                 emp.last_name = rset.getString("last_name");
+                emp.title = rset.getString("title");
+                emp.salary = rset.getInt("salary");
+                emp.dept_name = rset.getString("dept_name");
+                emp.manager = rset.getString("manager");
                 return emp;
             }
             else
-            {System.out.println("no success");
-                return null;}
-
+            {
+                System.out.println("No employee found with ID: " + ID);
+                return null;
+            }
         }
         catch (Exception e)
         {
@@ -105,6 +118,48 @@ public class App
             return null;
         }
     }
+    public void getSalariesByRole(String role)
+    {
+        try
+        {
+            String strSelect =
+                    "SELECT e.emp_no, e.first_name, e.last_name, s.salary " +
+                            "FROM employees e, salaries s, titles t " +
+                            "WHERE e.emp_no = s.emp_no " +
+                            "  AND e.emp_no = t.emp_no " +
+                            "  AND s.to_date = '9999-01-01' " +
+                            "  AND t.to_date = '9999-01-01' " +
+                            "  AND t.title = ? " +
+                            "ORDER BY e.emp_no ASC";
+
+            PreparedStatement pstmt = con.prepareStatement(strSelect);
+            pstmt.setString(1, role);
+
+            ResultSet rset = pstmt.executeQuery();
+
+            System.out.printf("%-10s %-15s %-15s %-10s\n",
+                    "Emp_No", "First_Name", "Last_Name", "Salary");
+            System.out.println("-----------------------------------------------------");
+
+            while (rset.next())
+            {
+                int emp_no = rset.getInt("emp_no");
+                String first = rset.getString("first_name");
+                String last = rset.getString("last_name");
+                int salary = rset.getInt("salary");
+
+                System.out.printf("%-10d %-15s %-15s %-10d\n",
+                        emp_no, first, last, salary);
+            }
+        }
+        catch (Exception e)
+        {
+            System.out.println(e.getMessage());
+            System.out.println("Failed to get salaries by role");
+        }
+    }
+
+
 
     public void displayEmployee(Employee emp)
     {
@@ -134,6 +189,9 @@ public class App
         Employee emp = a.getEmployee(490758);
         // Display results
         a.displayEmployee(emp);
+        // New feature: get salaries by role
+        System.out.println("\n--- Salaries for Engineers ---");
+        a.getSalariesByRole("Engineer");
 
         // Disconnect from database
         a.disconnect();
