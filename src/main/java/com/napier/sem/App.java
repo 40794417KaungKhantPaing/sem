@@ -107,7 +107,6 @@ public class App
             // Execute SQL statement
             ResultSet rset = stmt.executeQuery(strSelect);
 
-
             if (rset.next())
             {
                 Employee emp = new Employee();
@@ -202,7 +201,6 @@ public class App
         }
     }
 
-
     /**
      * Gets all the current employees and salaries.
      * @return A list of all employees and salaries, or null if there is an error.
@@ -244,6 +242,24 @@ public class App
         }
     }
 
+    /**
+     * Prints a list of employees.
+     * @param employees The list of employees to print.
+     */
+    public void printSalaries(ArrayList<Employee> employees)
+    {
+        // Print header
+        System.out.println(String.format("%-10s %-15s %-20s %-8s", "Emp No", "First Name", "Last Name", "Salary"));
+        // Loop over all employees in the list
+        for (Employee emp : employees)
+        {
+            String emp_string =
+                    String.format("%-10s %-15s %-20s %-8s",
+                            emp.emp_no, emp.first_name, emp.last_name, emp.salary);
+            System.out.println(emp_string);
+        }
+    }
+
     public static void main(String[] args)
     {
         // Create new Application
@@ -257,9 +273,15 @@ public class App
 
         // Test the size of the returned data - should be 240124
         if (employees != null)
+        {
             System.out.println(employees.size());
+            // Print all employee salaries
+            a.printSalaries(employees);
+        }
         else
+        {
             System.out.println("No employees returned.");
+        }
 
         // Disconnect from database
         a.disconnect();
