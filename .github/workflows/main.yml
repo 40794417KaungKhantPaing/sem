@@ -32,7 +32,12 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
         with:
-          submodules: recursive
+          submodules: false
+
+      - name: Download external test_db
+        run: |
+          git clone --depth 1 https://github.com/datacharmer/test_db.git db/test_db
+      
 
       - name: Set up JDK 18
         uses: actions/setup-java@v4
