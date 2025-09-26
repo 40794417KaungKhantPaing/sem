@@ -50,7 +50,7 @@ jobs:
       - name: Wait for MySQL
         run: |
           echo "Waiting for MySQL to be ready..."
-          until docker exec employees mysql -uroot -e "SELECT 1"; do
+          until docker exec employees mysql -uroot -pexample -e "SELECT 1"; do
             sleep 5
           done
 
