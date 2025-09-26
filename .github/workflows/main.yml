@@ -57,7 +57,7 @@ jobs:
       - name: Run Integration Tests
         run: mvn -Dtest=com.napier.sem.AppIntegrationTest test
         env:
-          DB_HOST: 127.0.0.1
+          DB_HOST: %
           DB_PORT: 3306
           DB_USER: root
           DB_PASSWORD: example
