@@ -43,19 +43,26 @@ jobs:
           # Build MySQL container
           docker build -t database ./db
 
-          # Run container with proper root password
+          # Run container with root password and bind-address
           docker run --name employees -dp 33060:3306 -e MYSQL_ROOT_PASSWORD=example database --bind-address=0.0.0.0
 
-          # Grant privileges to allow external connections
+          # Wait for MySQL to be ready
+          until docker exec employees mysql -uroot -pexample -e "SELECT 1;" > /dev/null 2>&1; do
+            echo "Waiting for MySQL..."
+            sleep 2
+          done
+
+          # Grant privileges
           docker exec -i employees mysql -uroot -pexample -e "GRANT ALL PRIVILEGES ON *.* TO 'root'@'%' IDENTIFIED BY 'root'; FLUSH PRIVILEGES;"
 
           # Run integration tests
           mvn -Dtest=com.napier.sem.AppIntegrationTest test
 
-          # Clean up
+          # Cleanup
           docker stop employees
           docker rm employees
           docker image rm database
+  
   
 
   Build:
