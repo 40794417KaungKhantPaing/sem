@@ -16,8 +16,9 @@ public class AppIntegrationTest
     {
         app = new App();
 
-        // Full JDBC URL with username and empty password
-        String jdbcUrl = "jdbc:mysql://127.0.0.1:33060/employees?user=root&password=example&useSSL=false&allowPublicKeyRetrieval=true";
+        String jdbcUrl = "jdbc:mysql://127.0.0.1:33060/employees?useSSL=false";
+        app.connect(jdbcUrl, 30000);
+
 
         // Connect to the database with 30s timeout
         app.connect(jdbcUrl, 30000);
