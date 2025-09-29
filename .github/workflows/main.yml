@@ -34,38 +34,18 @@ jobs:
         with:
           java-version: '18'
           distribution: 'temurin'
-
       - name: Download external test_db
-        run: git clone --depth 1 https://github.com/datacharmer/test_db.git db/test_db
-
-      - name: Build MySQL Docker Image
-        run: docker build -t database ./db
-
-      - name: Start MySQL Container
         run: |
-          docker run --name employees -d -p 3306:3306 database \
-            --default-authentication-plugin=mysql_native_password \
-            --bind-address=0.0.0.0
+          git clone --depth 1 https://github.com/datacharmer/test_db.git db/test_db
 
-      - name: Wait for MySQL
+      - name: Integration Tests
         run: |
-          echo "Waiting for MySQL to be ready..."
-          until docker exec employees mysql -uroot -pexample -e "SELECT 1"; do
-            sleep 5
-          done
-
-      - name: Run Integration Tests
-        run: mvn -Dtest=com.napier.sem.AppIntegrationTest test
-        env:
-          MYSQL_ROOT_PASSWORD: example
-          MYSQL_DATABASE: employees
-          MYSQL_ROOT_HOST: '%'
-
-      - name: Stop and Remove Container
-        run: |
+          docker build -t database ./db 
+          docker run --name employees -dp 33060:3306 database
+          mvn -Dtest=com.napier.devops.AppIntegrationTest test
           docker stop employees
           docker rm employees
-          docker image rm database                   
+          docker image rm database                
 
   Build:
     name: Build and Start Using docker-compose

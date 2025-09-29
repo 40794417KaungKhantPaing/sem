@@ -34,7 +34,7 @@ public class App
                 System.out.println("Successfully connected");
                 break;
             } catch (SQLException sqle) {
-                System.out.println("Failed to connect to database attempt " +                                  Integer.toString(i));
+                System.out.println("Failed to connect to database attempt " + i);
                 System.out.println(sqle.getMessage());
             } catch (InterruptedException ie) {
                 System.out.println("Thread interrupted? Should not happen.");
@@ -87,7 +87,6 @@ public class App
                 emp.last_name = rset.getString("last_name");
                 emp.title = rset.getString("title");
                 emp.salary = rset.getInt("salary");
-                emp.dept_name = rset.getString("dept_name");
 
                 // Department
                 Department dept = new Department();
@@ -106,6 +105,7 @@ public class App
                     mgr.last_name = managerLast;
                 }
                 dept.manager = mgr;
+
                 emp.manager = mgr;
                 emp.dept = dept;
 
@@ -154,7 +154,6 @@ public class App
                 emp.last_name = rset.getString("last_name");
                 emp.title = rset.getString("title");
                 emp.salary = rset.getInt("salary");
-                emp.dept_name = rset.getString("dept_name");
 
                 Department dept = new Department();
                 dept.dept_no = rset.getString("dept_no");
@@ -171,6 +170,7 @@ public class App
                     mgr.last_name = managerLast;
                 }
                 dept.manager = mgr;
+
                 emp.manager = mgr;
                 emp.dept = dept;
 
@@ -293,7 +293,6 @@ public class App
                 emp.first_name = rset.getString("first_name");
                 emp.last_name = rset.getString("last_name");
                 emp.salary = rset.getInt("salary");
-                emp.dept_name = dept.dept_name;
                 emp.manager = dept.manager;
                 emp.dept = dept;
                 employees.add(emp);
@@ -308,24 +307,28 @@ public class App
         }
     }
 
-    // Print salaries
     public void printSalaries(ArrayList<Employee> employees)
     {
-        if (employees == null || employees.isEmpty())
+        // Check employees is not null
+        if (employees == null)
         {
-            System.out.println("No salary data available.");
+            System.out.println("No employees");
             return;
         }
-
-        System.out.println(String.format("%-10s %-15s %-20s %-8s",
-                "Emp No", "First Name", "Last Name", "Salary"));
-
+        // Print header
+        System.out.println(String.format("%-10s %-15s %-20s %-8s", "Emp No", "First Name", "Last Name", "Salary"));
+        // Loop over all employees in the list
         for (Employee emp : employees)
         {
-            System.out.println(String.format("%-10s %-15s %-20s %-8s",
-                    emp.emp_no, emp.first_name, emp.last_name, emp.salary));
+            if (emp == null)
+                continue;
+            String emp_string =
+                    String.format("%-10s %-15s %-20s %-8s",
+                            emp.emp_no, emp.first_name, emp.last_name, emp.salary);
+            System.out.println(emp_string);
         }
     }
+
     /**
      * Display employee information to the console.
      * @param emp Employee object
@@ -344,7 +347,7 @@ public class App
                 emp.last_name,
                 emp.title,
                 emp.salary,
-                (emp.dept != null ? emp.dept.dept_name : emp.dept_name),
+                (emp.dept != null ? emp.dept.dept_name : "N/A"),
                 (emp.manager != null ? emp.manager.first_name + " " + emp.manager.last_name : "N/A")
         );
     }
@@ -361,7 +364,6 @@ public class App
 
         Department dept = a.getDepartment("Development");
         ArrayList<Employee> employees = a.getSalariesByDepartment(dept);
-
 
         // Print salary report
         a.printSalaries(employees);
