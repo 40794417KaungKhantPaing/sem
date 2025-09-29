@@ -40,7 +40,10 @@ jobs:
 
       - name: Build, run MySQL, and run Integration Tests
         run: |
+          # Build MySQL container
           docker build -t database ./db
+
+          # Run container with root password and bind-address
           docker run --name employees -dp 33060:3306 -e MYSQL_ROOT_PASSWORD=example database --bind-address=0.0.0.0
 
           # Wait for MySQL to be ready
@@ -49,9 +52,6 @@ jobs:
             sleep 2
           done
 
-          # Fix root user to allow connections from any host
-          docker exec -i employees mysql -uroot -pexample -e "ALTER USER 'root'@'%' IDENTIFIED WITH mysql_native_password BY 'example'; FLUSH PRIVILEGES;"
-
           # Run integration tests
           mvn -Dtest=com.napier.sem.AppIntegrationTest test
 
@@ -59,6 +59,7 @@ jobs:
           docker stop employees
           docker rm employees
           docker image rm database
+  
   
   
   
