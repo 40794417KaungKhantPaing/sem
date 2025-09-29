@@ -37,32 +37,17 @@ jobs:
       - name: Download external test_db
         run: |
           git clone --depth 1 https://github.com/datacharmer/test_db.git db/test_db
+          
+      
 
-      - name: Build, run MySQL, and run Integration Tests
+      - name: Integration Tests
         run: |
-          # Build MySQL container
-          docker build -t database ./db
-
-          # Run container with root password and bind-address
-          docker run --name employees -dp 33060:3306 -e MYSQL_ROOT_PASSWORD=example database --bind-address=0.0.0.0
-
-          # Wait for MySQL to be ready
-          until docker exec employees mysql -uroot -pexample -e "SELECT 1;" > /dev/null 2>&1; do
-            echo "Waiting for MySQL..."
-            sleep 2
-          done
-
-          # Run integration tests
+          docker build -t database ./db 
+          docker run --name employees -dp 33060:3306 database
           mvn -Dtest=com.napier.sem.AppIntegrationTest test
-
-          # Cleanup
           docker stop employees
           docker rm employees
-          docker image rm database
-  
-  
-  
-  
+          docker image rm database                
 
   Build:
     name: Build and Start Using docker-compose
