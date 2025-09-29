@@ -23,6 +23,7 @@ jobs:
         run: mvn -Dtest=com.napier.sem.AppTest test
 
   IntegrationTests:
+    name: Integration Tests
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -33,21 +34,25 @@ jobs:
         with:
           java-version: '18'
           distribution: 'temurin'
-
       - name: Download external test_db
-        run: git clone --depth 1 https://github.com/datacharmer/test_db.git db/test_db
-
-      - name: Build and run MySQL container
         run: |
+          git clone --depth 1 https://github.com/datacharmer/test_db.git db/test_db
+
+      - name: Build, run MySQL, and run Integration Tests
+        run: |
+          # Build MySQL container
           docker build -t database ./db
+
+          # Run container with proper root password
           docker run --name employees -dp 33060:3306 -e MYSQL_ROOT_PASSWORD=example database --bind-address=0.0.0.0
+
+          # Grant privileges to allow external connections
           docker exec -i employees mysql -uroot -pexample -e "GRANT ALL PRIVILEGES ON *.* TO 'root'@'%' IDENTIFIED BY 'root'; FLUSH PRIVILEGES;"
 
-      - name: Run Integration Tests
-        run: mvn -Dtest=com.napier.sem.AppIntegrationTest test
+          # Run integration tests
+          mvn -Dtest=com.napier.sem.AppIntegrationTest test
 
-      - name: Cleanup Docker
-        run: |
+          # Clean up
           docker stop employees
           docker rm employees
           docker image rm database
