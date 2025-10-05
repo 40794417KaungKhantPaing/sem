@@ -7,7 +7,7 @@
 
     <groupId>com.napier.sem</groupId>
     <artifactId>seMethods</artifactId>
-    <version>v0.1-alpha-5</version>
+    <version>v0.1-alpha-4</version>
 
     <properties>
         <maven.compiler.source>18</maven.compiler.source>
@@ -56,7 +56,6 @@
                 <artifactId>maven-assembly-plugin</artifactId>
                 <version>3.3.0</version>
                 <configuration>
-                    <finalName>sem</finalName>
                     <archive>
                         <manifest>
                             <mainClass>com.napier.sem.App</mainClass>
@@ -65,7 +64,7 @@
                     <descriptorRefs>
                         <descriptorRef>jar-with-dependencies</descriptorRef>
                     </descriptorRefs>
-                    <appendAssemblyId>false</appendAssemblyId>
+                    <appendAssemblyId>false</appendAssemblyId> <!-- optional -->
                 </configuration>
                 <executions>
                     <execution>
@@ -77,6 +76,7 @@
                     </execution>
                 </executions>
             </plugin>
+
 
             <!-- Surefire plugin for JUnit 5 -->
             <plugin>
