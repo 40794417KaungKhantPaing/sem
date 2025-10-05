@@ -2,4 +2,4 @@
 [![LICENSE](https://img.shields.io/github/license/40794417KaungKhantPaing/sem.svg?style=flat-square&label=License)](https://github.com/40794417KaungKhantPaing/sem/blob/master/LICENSE)
 ![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/40794417KaungKhantPaing/sem/main.yml?branch=develop&style=flat-square&label=Develop%20Build)
 [![Releases](https://img.shields.io/github/release/40794417KaungKhantPaing/sem/all.svg?style=flat-square&label=Release)](https://github.com/40794417KaungKhantPaing/sem/releases)
-[![codecov](https://codecov.io/gh/40794417KaungKhantPaing/sem/branch/develop/graph/badge.svg?token=0OKSM90BSQ)](https://codecov.io/gh/40794417KaungKhantPaing/sem)
+[![codecov](https://codecov.io/gh/40794417KaungKhantPaing/sem/graph/badge.svg?token=0OKSM90BSQ)](https://codecov.io/gh/40794417KaungKhantPaing/sem)
