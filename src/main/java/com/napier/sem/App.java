@@ -12,40 +12,31 @@ public class App
     private Connection con = null;
 
     // Connect to database
-    public void connect()
-    {
-        try
-        {
+    public void connect(String location, int delay) {
+        try {
+            // Load Database driver
             Class.forName("com.mysql.cj.jdbc.Driver");
-        }
-        catch (ClassNotFoundException e)
-        {
+        } catch (ClassNotFoundException e) {
             System.out.println("Could not load SQL driver");
             System.exit(-1);
         }
 
-        int retries = 30;
-        for (int i = 0; i < retries; ++i)
-        {
+        int retries = 10;
+        for (int i = 0; i < retries; ++i) {
             System.out.println("Connecting to database...");
-            try
-            {
-                Thread.sleep(30000);
-                con = DriverManager.getConnection(
-                        "jdbc:mysql://db:3306/employees?allowPublicKeyRetrieval=true&useSSL=false",
-                        "root",
-                        "example"
-                );
+            try {
+                // Wait a bit for db to start
+                Thread.sleep(delay);
+                // Connect to database
+                con = DriverManager.getConnection("jdbc:mysql://" + location
+                                + "/employees?allowPublicKeyRetrieval=true&useSSL=false",
+                        "root", "example");
                 System.out.println("Successfully connected");
                 break;
-            }
-            catch (SQLException sqle)
-            {
+            } catch (SQLException sqle) {
                 System.out.println("Failed to connect to database attempt " + i);
                 System.out.println(sqle.getMessage());
-            }
-            catch (InterruptedException ie)
-            {
+            } catch (InterruptedException ie) {
                 System.out.println("Thread interrupted? Should not happen.");
             }
         }
@@ -96,7 +87,6 @@ public class App
                 emp.last_name = rset.getString("last_name");
                 emp.title = rset.getString("title");
                 emp.salary = rset.getInt("salary");
-                emp.dept_name = rset.getString("dept_name");
 
                 // Department
                 Department dept = new Department();
@@ -115,6 +105,7 @@ public class App
                     mgr.last_name = managerLast;
                 }
                 dept.manager = mgr;
+
                 emp.manager = mgr;
                 emp.dept = dept;
 
@@ -163,7 +154,6 @@ public class App
                 emp.last_name = rset.getString("last_name");
                 emp.title = rset.getString("title");
                 emp.salary = rset.getInt("salary");
-                emp.dept_name = rset.getString("dept_name");
 
                 Department dept = new Department();
                 dept.dept_no = rset.getString("dept_no");
@@ -180,6 +170,7 @@ public class App
                     mgr.last_name = managerLast;
                 }
                 dept.manager = mgr;
+
                 emp.manager = mgr;
                 emp.dept = dept;
 
@@ -302,7 +293,6 @@ public class App
                 emp.first_name = rset.getString("first_name");
                 emp.last_name = rset.getString("last_name");
                 emp.salary = rset.getInt("salary");
-                emp.dept_name = dept.dept_name;
                 emp.manager = dept.manager;
                 emp.dept = dept;
                 employees.add(emp);
@@ -317,24 +307,28 @@ public class App
         }
     }
 
-    // Print salaries
     public void printSalaries(ArrayList<Employee> employees)
     {
-        if (employees == null || employees.isEmpty())
+        // Check employees is not null
+        if (employees == null)
         {
-            System.out.println("No salary data available.");
+            System.out.println("No employees");
             return;
         }
-
-        System.out.println(String.format("%-10s %-15s %-20s %-8s",
-                "Emp No", "First Name", "Last Name", "Salary"));
-
+        // Print header
+        System.out.println(String.format("%-10s %-15s %-20s %-8s", "Emp No", "First Name", "Last Name", "Salary"));
+        // Loop over all employees in the list
         for (Employee emp : employees)
         {
-            System.out.println(String.format("%-10s %-15s %-20s %-8s",
-                    emp.emp_no, emp.first_name, emp.last_name, emp.salary));
+            if (emp == null)
+                continue;
+            String emp_string =
+                    String.format("%-10s %-15s %-20s %-8s",
+                            emp.emp_no, emp.first_name, emp.last_name, emp.salary);
+            System.out.println(emp_string);
         }
     }
+
     /**
      * Display employee information to the console.
      * @param emp Employee object
@@ -353,38 +347,45 @@ public class App
                 emp.last_name,
                 emp.title,
                 emp.salary,
-                (emp.dept != null ? emp.dept.dept_name : emp.dept_name),
+                (emp.dept != null ? emp.dept.dept_name : "N/A"),
                 (emp.manager != null ? emp.manager.first_name + " " + emp.manager.last_name : "N/A")
         );
     }
-
-    public static void main(String[] args)
+    public void addEmployee(Employee emp)
     {
-        App a = new App();
-        a.connect();
-
-        // Example: get employee by ID
-        Employee emp = a.getEmployee(255530);
-        a.displayEmployee(emp);
-
-        // Example: get employee by name
-        Employee emp2 = a.getEmployee("John", "Doe");
-        a.displayEmployee(emp2);
-
-        // Example: get salaries by role
-        a.getSalariesByRole("Engineer");
-
-        // Example: get department and salaries
-        Department dept = a.getDepartment("Sales");
-        if (dept != null)
+        try
         {
-            System.out.println("Department: " + dept.dept_name + " (" + dept.dept_no + ")");
-            System.out.println("Manager: " + (dept.manager != null ? dept.manager.first_name + " " + dept.manager.last_name : "N/A"));
+            Statement stmt = con.createStatement();
+            String strUpdate =
+                    "INSERT INTO employees (emp_no, first_name, last_name, birth_date, gender, hire_date) " +
+                            "VALUES (" + emp.emp_no + ", '" + emp.first_name + "', '" + emp.last_name + "', " +
+                            "'9999-01-01', 'M', '9999-01-01')";
+            stmt.execute(strUpdate);
+        }
+        catch (Exception e)
+        {
+            System.out.println(e.getMessage());
+            System.out.println("Failed to add employee");
+        }
+    }
 
-            ArrayList<Employee> employees = a.getSalariesByDepartment(dept);
-            a.printSalaries(employees);
+    public static void main(String[] args) {
+        // Create new Application and connect to database
+        App a = new App();
+
+        if(args.length < 1){
+            a.connect("localhost:33060", 30000);
+        }else{
+            a.connect(args[0], Integer.parseInt(args[1]));
         }
 
+        Department dept = a.getDepartment("Development");
+        ArrayList<Employee> employees = a.getSalariesByDepartment(dept);
+
+        // Print salary report
+        a.printSalaries(employees);
+
+        // Disconnect from database
         a.disconnect();
     }
 }
