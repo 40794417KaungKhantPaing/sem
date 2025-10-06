@@ -87,10 +87,6 @@ jobs:
         run: |
           git clone --depth 1 https://github.com/datacharmer/test_db.git db/test_db
 
-      - name: Package and Run docker-compose
-        run: |
-          mvn package -DskipTests
-          docker compose up --abort-on-container-exit
 
       - name: Package and Run docker compose
         run: |
@@ -98,7 +94,7 @@ jobs:
           docker compose up --abort-on-container-exit
       - uses: "marvinpinto/action-automatic-releases@latest"
         with:
-          repo_token: "${{ secrets.GITHUB_TOKEN }}"
+          repo_token: "${{ secrets.Personal_TOKEN }}"
           prerelease: false
           automatic_release_tag: "latest"
           files: |
