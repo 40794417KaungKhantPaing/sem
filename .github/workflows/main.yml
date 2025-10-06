@@ -14,13 +14,20 @@ jobs:
         with:
           java-version: '18'
           distribution: 'temurin'
+      - name: Unit Tests
+        run: mvn -Dtest=com.napier.sem.AppTest test
+      - name: CodeCov
+        uses: codecov/codecov-action@v2
+        with:
+          # token: ${{ secrets.CODECOV_TOKEN }} # not required for public repos
+          directory: ./target/site/jacoco
+          flags: Unit Tests # optional
+          verbose: true # optional (default = false)
 
       - name: Download external test_db
         run: |
           git clone --depth 1 https://github.com/datacharmer/test_db.git db/test_db
 
-      - name: Run Unit Tests
-        run: mvn -Dtest=com.napier.sem.AppTest test
 
   IntegrationTests:
     name: Integration Tests
@@ -39,7 +46,7 @@ jobs:
         run: |
           git clone --depth 1 https://github.com/datacharmer/test_db.git db/test_db
 
-      - name: Integration Tests
+      - name: Integration Tests and CodeCov
         run: |
           # Build and start the database container
           docker build -t database ./db
@@ -53,7 +60,7 @@ jobs:
           docker rm employees
           docker image rm database
 
-      - name: Upload coverage to Codecov
+      - name: Codecov
         uses: codecov/codecov-action@v2
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
@@ -63,7 +70,7 @@ jobs:
   
 
   Build:
-    name: Build and Start Using docker-compose
+    name: Build Run in Docker and Deploy Release
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -80,7 +87,15 @@ jobs:
         run: |
           git clone --depth 1 https://github.com/datacharmer/test_db.git db/test_db
 
-      - name: Package and Run docker-compose
+
+      - name: Package and Run docker compose
         run: |
           mvn package -DskipTests
           docker compose up --abort-on-container-exit
+      - uses: "marvinpinto/action-automatic-releases@latest"
+        with:
+          repo_token: "${{ secrets.Personal_TOKEN }}"
+          prerelease: false
+          automatic_release_tag: "latest"
+          files: |
+            ./target/*.jar
