@@ -1,5 +1,6 @@
 package com.napier.sem;
 
+import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -15,11 +16,12 @@ import java.util.ArrayList;
 
 @SpringBootApplication
 @RestController
-public class App {
+public class App implements CommandLineRunner {
 
     private static Connection con = null;
 
-    // Connect to database
+    // ------------------- DATABASE CONNECTION -------------------
+
     public static void connect(String location, int delay) {
         try {
             Class.forName("com.mysql.cj.jdbc.Driver");
@@ -58,7 +60,7 @@ public class App {
         }
     }
 
-    // ------------------- ORIGINAL METHODS -------------------
+    // ------------------- EMPLOYEE METHODS -------------------
 
     public Employee getEmployee(int ID) {
         try {
@@ -106,61 +108,6 @@ public class App {
                 return emp;
             } else {
                 System.out.println("Employee not found");
-                return null;
-            }
-        } catch (Exception e) {
-            System.out.println(e.getMessage());
-            System.out.println("Failed to get employee details");
-            return null;
-        }
-    }
-
-    public Employee getEmployee(String firstName, String lastName) {
-        try {
-            Statement stmt = con.createStatement();
-            String strSelect =
-                    "SELECT e.emp_no, e.first_name, e.last_name, t.title, s.salary, d.dept_no, d.dept_name, " +
-                            "m.emp_no AS manager_no, m.first_name AS manager_first, m.last_name AS manager_last " +
-                            "FROM employees e " +
-                            "LEFT JOIN titles t ON e.emp_no = t.emp_no " +
-                            "LEFT JOIN salaries s ON e.emp_no = s.emp_no " +
-                            "LEFT JOIN dept_emp de ON e.emp_no = de.emp_no " +
-                            "LEFT JOIN departments d ON de.dept_no = d.dept_no " +
-                            "LEFT JOIN dept_manager dm ON de.dept_no = dm.dept_no " +
-                            "LEFT JOIN employees m ON dm.emp_no = m.emp_no " +
-                            "WHERE e.first_name = '" + firstName + "' AND e.last_name = '" + lastName + "' " +
-                            "ORDER BY s.to_date DESC LIMIT 1;";
-
-            ResultSet rset = stmt.executeQuery(strSelect);
-
-            if (rset.next()) {
-                Employee emp = new Employee();
-                emp.emp_no = rset.getInt("emp_no");
-                emp.first_name = rset.getString("first_name");
-                emp.last_name = rset.getString("last_name");
-                emp.title = rset.getString("title");
-                emp.salary = rset.getInt("salary");
-
-                Department dept = new Department();
-                dept.dept_no = rset.getString("dept_no");
-                dept.dept_name = rset.getString("dept_name");
-
-                Employee mgr = null;
-                String managerFirst = rset.getString("manager_first");
-                String managerLast = rset.getString("manager_last");
-                if (managerFirst != null && managerLast != null) {
-                    mgr = new Employee();
-                    mgr.emp_no = rset.getInt("manager_no");
-                    mgr.first_name = managerFirst;
-                    mgr.last_name = managerLast;
-                }
-                dept.manager = mgr;
-                emp.manager = mgr;
-                emp.dept = dept;
-
-                return emp;
-            } else {
-                System.out.println("Employee not found: " + firstName + " " + lastName);
                 return null;
             }
         } catch (Exception e) {
@@ -305,6 +252,8 @@ public class App {
         return employees;
     }
 
+    // ------------------- OUTPUT METHODS -------------------
+
     public void printSalaries(ArrayList<Employee> employees) {
         if (employees == null) {
             System.out.println("No employees");
@@ -315,37 +264,6 @@ public class App {
             if (emp == null) continue;
             System.out.println(String.format("%-10s %-15s %-20s %-8s",
                     emp.emp_no, emp.first_name, emp.last_name, emp.salary));
-        }
-    }
-
-    public void displayEmployee(Employee emp) {
-        if (emp == null) {
-            System.out.println("No employee data to display");
-            return;
-        }
-        System.out.printf(
-                "Emp No: %d\nName: %s %s\nTitle: %s\nSalary: %d\nDepartment: %s\nManager: %s\n",
-                emp.emp_no,
-                emp.first_name,
-                emp.last_name,
-                emp.title,
-                emp.salary,
-                (emp.dept != null ? emp.dept.dept_name : "N/A"),
-                (emp.manager != null ? emp.manager.first_name + " " + emp.manager.last_name : "N/A")
-        );
-    }
-
-    public void addEmployee(Employee emp) {
-        try {
-            Statement stmt = con.createStatement();
-            String strUpdate =
-                    "INSERT INTO employees (emp_no, first_name, last_name, birth_date, gender, hire_date) " +
-                            "VALUES (" + emp.emp_no + ", '" + emp.first_name + "', '" + emp.last_name + "', " +
-                            "'9999-01-01', 'M', '9999-01-01')";
-            stmt.execute(strUpdate);
-        } catch (Exception e) {
-            System.out.println(e.getMessage());
-            System.out.println("Failed to add employee");
         }
     }
 
@@ -366,8 +284,8 @@ public class App {
                     emp.last_name + " | " +
                     (emp.title != null ? emp.title : "N/A") + " | " +
                     emp.salary + " | " +
-                    (emp.dept != null ? emp.dept.toString() : "N/A") + " | " +
-                    (emp.manager != null ? emp.manager.emp_no : "N/A") + " |\r\n");
+                    (emp.dept != null ? emp.dept.dept_name : "N/A") + " | " +
+                    (emp.manager != null ? emp.manager.first_name + " " + emp.manager.last_name : "N/A") + " |\r\n");
         }
 
         try {
@@ -381,17 +299,11 @@ public class App {
         }
     }
 
-    // ------------------- NEW URL ENTRY POINT METHODS -------------------
+    // ------------------- API ENDPOINTS -------------------
 
     @RequestMapping("employee")
     public Employee getEmployeeEndpoint(@RequestParam(value = "id") int ID) {
         return getEmployee(ID);
-    }
-
-    @RequestMapping("employeeByName")
-    public Employee getEmployeeByNameEndpoint(@RequestParam(value = "first") String firstName,
-                                              @RequestParam(value = "last") String lastName) {
-        return getEmployee(firstName, lastName);
     }
 
     @RequestMapping("department")
@@ -410,12 +322,18 @@ public class App {
         return getSalariesByDepartment(dept);
     }
 
-    // ------------------- MAIN -------------------
+    // ------------------- MAIN ENTRY -------------------
 
     public static void main(String[] args) {
         SpringApplication.run(App.class, args);
+    }
 
+    // ------------------- COMMAND LINE TASK -------------------
+
+    @Override
+    public void run(String... args) {
         App a = new App();
+
         if (args.length < 1) {
             a.connect("localhost:33060", 30000);
         } else {
@@ -426,9 +344,10 @@ public class App {
         ArrayList<Employee> employees = a.getSalariesByDepartment(dept);
         a.printSalaries(employees);
 
-        ArrayList<Employee> employees1 = a.getSalariesByRole("Manager");
-        a.outputEmployees(employees1, "ManagerSalaries.md");
+        ArrayList<Employee> managers = a.getSalariesByRole("Manager");
+        a.outputEmployees(managers, "ManagerSalaries.md");
 
         a.disconnect();
+        System.exit(0); // ✅ Ensure app stops after completion
     }
 }
