@@ -255,10 +255,11 @@ public class App
                             "JOIN titles t ON e.emp_no = t.emp_no AND t.to_date = '9999-01-01' " +
                             "LEFT JOIN dept_emp de ON e.emp_no = de.emp_no " +
                             "LEFT JOIN departments d ON de.dept_no = d.dept_no " +
-                            "LEFT JOIN dept_manager dm ON d.dept_no = dm.dept_no " +
+                            "LEFT JOIN dept_manager dm ON d.dept_no = dm.dept_no AND dm.to_date = '9999-01-01' " +  // only current manager
                             "LEFT JOIN employees m ON dm.emp_no = m.emp_no " +
                             "WHERE t.title = '" + title + "' " +
                             "ORDER BY e.emp_no ASC;";
+
 
             ResultSet rset = stmt.executeQuery(strSelect);
 
