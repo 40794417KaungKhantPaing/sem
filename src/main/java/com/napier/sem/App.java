@@ -1,5 +1,9 @@
 package com.napier.sem;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
@@ -238,11 +242,9 @@ public class App
         }
     }
 
-    // Get salaries by role
-    public void getSalariesByRole(String title)
-    {
-        try
-        {
+    public ArrayList<Employee> getSalariesByRole(String title) {
+        ArrayList<Employee> employees = new ArrayList<>();
+        try {
             Statement stmt = con.createStatement();
             String strSelect =
                     "SELECT e.emp_no, e.first_name, e.last_name, s.salary " +
@@ -253,22 +255,21 @@ public class App
                             "ORDER BY e.emp_no ASC;";
             ResultSet rset = stmt.executeQuery(strSelect);
 
-            System.out.println("Salaries for role: " + title);
-            while (rset.next())
-            {
-                System.out.printf("%-8d%-15s%-15s%-8d\n",
-                        rset.getInt("emp_no"),
-                        rset.getString("first_name"),
-                        rset.getString("last_name"),
-                        rset.getInt("salary"));
+            while (rset.next()) {
+                Employee emp = new Employee();
+                emp.emp_no = rset.getInt("emp_no");
+                emp.first_name = rset.getString("first_name");
+                emp.last_name = rset.getString("last_name");
+                emp.salary = rset.getInt("salary");
+                employees.add(emp);
             }
-        }
-        catch (Exception e)
-        {
+        } catch (Exception e) {
             System.out.println(e.getMessage());
             System.out.println("Failed to get salaries by role");
         }
+        return employees;
     }
+
 
     // Get salaries by department
     public ArrayList<Employee> getSalariesByDepartment(Department dept)
@@ -369,6 +370,40 @@ public class App
         }
     }
 
+    /**
+     * Outputs to Markdown
+     *
+     * @param employees
+     */
+    public void outputEmployees(ArrayList<Employee> employees, String filename) {
+        // Check employees is not null
+        if (employees == null) {
+            System.out.println("No employees");
+            return;
+        }
+
+        StringBuilder sb = new StringBuilder();
+        // Print header
+        sb.append("| Emp No | First Name | Last Name | Title | Salary | Department |                    Manager |\r\n");
+        sb.append("| --- | --- | --- | --- | --- | --- | --- |\r\n");
+        // Loop over all employees in the list
+        for (Employee emp : employees) {
+            if (emp == null) continue;
+            sb.append("| " + emp.emp_no + " | " +
+                    emp.first_name + " | " + emp.last_name + " | " +
+                    emp.title + " | " + emp.salary + " | "
+                    + emp.dept + " | " + emp.manager + " |\r\n");
+        }
+        try {
+            new File("./reports/").mkdir();
+            BufferedWriter writer = new BufferedWriter(new FileWriter(new                                 File("./reports/" + filename)));
+            writer.write(sb.toString());
+            writer.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
     public static void main(String[] args) {
         // Create new Application and connect to database
         App a = new App();
@@ -384,6 +419,9 @@ public class App
 
         // Print salary report
         a.printSalaries(employees);
+
+        ArrayList<Employee> employees1 = a.getSalariesByRole("Manager");
+        a.outputEmployees(employees1, "ManagerSalaries.md");
 
         // Disconnect from database
         a.disconnect();
