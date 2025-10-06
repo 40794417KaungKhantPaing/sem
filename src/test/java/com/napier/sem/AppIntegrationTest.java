@@ -88,6 +88,7 @@ public class AppIntegrationTest
         assertNull(employees);
     }
 
+
     @Test
     void testPrintSalariesEmptyList()
     {
