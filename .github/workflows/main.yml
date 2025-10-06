@@ -102,8 +102,12 @@ jobs:
 
       - name: Copy Output
         run: docker container cp sem-app-1:./tmp/reports ./
-      - name: Deploy
+
+      - name: Deploy to GitHub Pages
         uses: JamesIves/github-pages-deploy-action@v4.2.5
         with:
-          branch: reports # The branch the action should deploy to.
-          folder: reports # The folder we are copying
+          branch: reports          # Branch to deploy to
+          folder: reports          # Folder containing content to deploy
+          clean: true              # Remove existing files before deploying
+          token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}  # Use a PAT with repo permissions
+
