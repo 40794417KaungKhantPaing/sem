@@ -38,4 +38,9 @@ public class Employee
      * Employee's manager
      */
     public Employee manager;
+
+    @Override
+    public String toString() {
+        return first_name != null && last_name != null ? first_name + " " + last_name : "N/A";
+    }
 }

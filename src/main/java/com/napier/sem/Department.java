@@ -19,4 +19,9 @@ public class Department
      * Department manager (name as String for now, can later be changed to Employee)
      */
     public Employee manager;
+
+    @Override
+    public String toString() {
+        return dept_name != null ? dept_name : "N/A";
+    }
 }
