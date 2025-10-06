@@ -439,7 +439,7 @@ public class App
                     (emp.title != null ? emp.title : "N/A") + " | " +
                     emp.salary + " | " +
                     (emp.dept != null ? emp.dept.toString() : "N/A") + " | " +
-                    (emp.manager != null ? emp.manager.toString() : "N/A") + " |\r\n");
+                    (emp.manager != null ? emp.manager.emp_no : "N/A") + " |\r\n");  // <-- changed here
         }
 
         try {
@@ -452,6 +452,7 @@ public class App
             e.printStackTrace();
         }
     }
+
 
 
     public static void main(String[] args) {
